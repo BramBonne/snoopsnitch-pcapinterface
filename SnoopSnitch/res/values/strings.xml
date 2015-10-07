@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    
     <!-- General -->
 	<string name="app_name">SnoopSnitch</string>
     <string name="common_events">Events</string>
@@ -9,11 +9,11 @@
     <string name="common_imsi_catcher">IMSI Catcher</string>
     <string name="common_3g_title">3G</string>
     <string name="common_2g_title">2G</string>
-
+    
     <!-- Action Bar Titles -->
     <string name="actionBar_title">SnoopSnitch</string>
     <string name="actionBar_subTitle">App ID:</string>
-
+   	
    	<!-- Action Bar Buttons -->
    	<string name="action_scan">Scan</string>
     <string name="action_map">Map</string>
@@ -26,19 +26,19 @@
     <string name="action_settings">Settings</string>
     <string name="action_about">About</string>
     <string name="action_exit">Exit</string>
-
+    
     <!-- Common Buttons -->
     <string name="common_button_upload">upload</string>
     <string name="common_button_nodata">No data</string>
-    <string name="common_button_networktest_start">Start Test</string>
-    <string name="common_button_networktest_stop">Stop Test</string>
-
+    <string name="common_button_networktest_start">Start Test</string> 
+    <string name="common_button_networktest_stop">Stop Test</string> 
+    
     <!-- Messages -->
     <string name="message_smsDetected">New SMS detected&#8230;</string>
     <string name="message_imsiCatcherDetected">New IMSI catcher detected&#8230;</string>
     <string name="message_recordingStarted">Recording started&#8230;</string>
     <string name="message_recordingStopped">Recording stopped&#8230;</string>
-
+    
     <!-- Alerts -->
 
     <string name="alert_button_quit">Quit</string>
@@ -150,13 +150,13 @@ https://opensource.srlabs.de/projects/snoopsnitch\n
     <string name="dashboard_network_security_impersonation_title">Impersonation</string>
     <string name="dashboard_network_security_protectionLevel_high">higher\nprotection</string>
     <string name="dashboard_network_security_protectionLevel_low">lower\nprotection</string>
-
+    
     <!-- Detail Screen -->
     <string name="detailChart_title_month">Last weeks</string>
     <string name="detailChart_title_week">Last 7 days</string>
     <string name="detailChart_title_day">Last 24 hours</string>
     <string name="detailChart_title_hour">Last hour</string>
-
+    
     <!-- Preferences Screen -->
   	<string name="settings_actionBar_title">Settings</string>
 
@@ -166,44 +166,44 @@ https://opensource.srlabs.de/projects/snoopsnitch\n
     <string name="settings_basebandlogkeepduration_title">Baseband log clean interval</string>
     <string name="settings_basebandlogkeepduration_summary">Radio traces are purged from the phone that often</string>
     <string name="settings_basebandlogkeepduration_dialogtitle">Select interval:</string>
-
+    
     <string name="settings_locationlogkeepduration_title">Location log clean interval</string>
     <string name="settings_locationlogkeepduration_summary">Information about your location is purged from the phone that often</string>
     <string name="settings_locationlogkeepduration_dialogtitle">Select interval:</string>
-
+    
     <string name="settings_analysiskeepduration_title">Analysis data clean interval</string>
     <string name="settings_analysiskeepduration_summary">Data from catcher and event analysis is purged from the phone that often</string>
     <string name="settings_analysiskeepduration_dialogtitle">Select interval:</string>
-
+    
     <string name="settings_debuglogkeepduration_title">Debug log clean interval</string>
     <string name="settings_debuglogkeepduration_summary">Debug logs are purged from the phone that often</string>
     <string name="settings_debuglogkeepduration_dialogtitle">Select interval:</string>
-
+        
     <string name="settings_metadatakeepduration_title">Metadata clean interval</string>
     <string name="settings_metadatakeepduration_summary">Catcher and event metadata is purged from the phone that often</string>
     <string name="settings_metadatakeepduration_dialogtitle">Select interval:</string>
-
+    
     <string name="settings_gpsrecording_title">Record GPS location</string>
     <string name="settings_gpsrecording_summary">Use fine-grained GPS-based location recording to get location information for IMSI catcher and security events</string>
-
+    
     <string name="settings_networklocationrecording_title">Record network location</string>
     <string name="settings_networklocationrecording_summary">Use coarse-grained network-based location recording to get location information for IMSI catcher and security events</string>
-
+    
     <string name="settings_unencryptedlogfilesrecording_title">Unencrypted log files</string>
     <string name="settings_unencryptedlogfilesrecording_summary">Record log files in plaintext. Sensitive information is NOT removed from the device for you!</string>
-
+    
     <string name="settings_unencrypteddumpfilesrecording_title">Unencrypted radio data</string>
     <string name="settings_unencrypteddumpfilesrecording_summary">Record dump files in plaintext. Sensitive information is NOT removed from the device for you!</string>
-
+    
     <string name="settings_encrypteddumpfilesrecording_title">Encrypted radio data</string>
     <string name="settings_encrypteddumpfilesrecording_summary">Store radio data encrypted with our public key.</string>
 
     <string name="settings_dumpunencryptedevents_title">Unencrypted event dumps</string>
     <string name="settings_dumpunencryptedevents_summary">Store event dump files unencrypted on phone. Sensitive information is NOT removed from the device for you!</string>
-
+    
     <string name="settings_applicationid_title">App ID</string>
     <string name="settings_applicationid_summary">Your can use your app ID to hint us at the files you uploaded. Refresh it anytime by tapping here.</string>
-
+    
     <string name="settings_active_test_force_offline_title">Force offline test</string>
     <string name="settings_active_test_force_offline_summary">Force using offline mode in active test. No data connection is used in this case.</string>
 
@@ -212,10 +212,10 @@ https://opensource.srlabs.de/projects/snoopsnitch\n
 
     <string name="settings_active_test_sms_mo_number_title">Outgoing SMS number</string>
     <string name="settings_active_test_sms_mo_number_summary">Please enter a number to which you can send SMS for free. The default \"*4*\" is an invalid number and most providers don\'t charge for SMS sent to this number.</string>
-
+    
     <string name="settings_active_test_num_iterations_title">Active test iterations</string>
     <string name="settings_active_test_num_iterations_dialogtitle">Number of iterations for each active test.</string>
-
+    
     <string name="settings_active_test_disable_upload_title">Don\'t upload test results</string>
     <string name="settings_active_test_disable_upload_summary">Evaluate active test results on the phone only. No radio data is uploaded to our servers in this case.</string>
 
@@ -225,7 +225,7 @@ https://opensource.srlabs.de/projects/snoopsnitch\n
     <string name="settings_cat_log_encryption">Log file encryption</string>
     <string name="settings_cat_privacy">Privacy</string>
     <string name="settings_cat_active_test">Active test parameters</string>
-
+    
      <!-- List view row -->
      <string name="listview_sms_item_type">Type:</string>
      <string name="listview_sms_item_Time">Time:</string>
@@ -234,17 +234,17 @@ https://opensource.srlabs.de/projects/snoopsnitch\n
      <string name="listview_sms_item_smsc">SMSC:</string>
      <string name="listview_sms_item_source">Source:</string>
      <string name="listview_imsi_item_score">Score:</string>
-     <string name="listview_imsi_item_time">Time:</string>
+     <string name="listview_imsi_item_time">Time:</string>   
      <string name="listview_imsi_item_position">Location:</string>
      <string name="listview_imsi_item_cellid">Cell ID:</string>
      <string name="listview_provider_item_ownprovider_text">Your network</string>
      <string name="listview_provider_item_testresult">Your test result</string>
-
+     
      <!-- Alert Dialog (to Refresh App ID) -->
      <string name="alert_dialog_refreshappid_button_refresh">Refresh</string>
      <string name="alert_dialog_refreshappid_title">Refresh app ID</string>
      <string name="alert_dialog_refreshappid_message">You are about to refresh the app ID. Are you sure?</string>
-
+     
      <!-- Error notification -->
      <string name="error_notification_title">had a problem</string>
      <string name="error_notification_ticker">encountered an internal error</string>
@@ -288,7 +288,7 @@ https://opensource.srlabs.de/projects/snoopsnitch\n
      <string name="compat_su_not_present">Your device is not rooted (no su binary found).</string>
      <string name="compat_root_denied">Root access denied by su. Check permissions.</string>
      <string name="compat_no_root">Root access failed.</string>
-
+     
      <string name="compat_no_baseband_messages_in_active_test">Error, no baseband messages received during active test.</string>
      <string name="compat_no_baseband_messages">Error, no baseband messages.</string>
 
@@ -370,12 +370,6 @@ https://opensource.srlabs.de/projects/snoopsnitch\n
      <string name="settings_pcap_filename_prefix">PCAP file location</string>
      <string name="settings_pcap_filename_prefix_summary">Path and filename prefix for sniffing pcap files, SnoopSnitch will append a timestamp to the prefix. Defaults to /sdcard/snoopsnitch</string>
 
-     <string name="settings_enable_pcap_socket">PCAP socket</string>
-     <string name="settings_enable_pcap_socket_summary">Open a socket to pipe PCAP capture through</string>
-
-     <string name="settings_pcap_socket_port">PCAP socket port</string>
-     <string name="settings_pcap_socket_port_summary">Port on which SnoopSnitch will be serving the PCAP stream. Defaults to 9742.</string>
-
     <string name="alert_button_ok">@android:string/ok</string>
     <string name="alert_button_cancel">@android:string/cancel</string>
     <string name="alert_dialog_refreshappid_button_cancel">@android:string/cancel</string>
@@ -439,5 +433,5 @@ GNU General Public License for more details.\n
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.\n
 </string>
-
+    
 </resources>
