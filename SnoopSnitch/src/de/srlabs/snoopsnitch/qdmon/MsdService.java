@@ -29,6 +29,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.io.FileNotFoundException;
+import java.io.BufferedInputStream;
+
 import javax.net.ssl.SSLPeerUnverifiedException;
 
 import org.apache.http.Header;
@@ -252,6 +257,7 @@ public class MsdService extends Service{
 	private SqliteThread sqliteThread = null;
 	private ParserErrorThread parserErrorThread;
 	private FromParserThread fromParserThread;
+	private FifoPiperThread fifoPiperThread;
 	private ToParserThread toParserThread;
 	private ToDiagThread toDiagThread;
 	private DiagErrorThread diagErrorThread;
@@ -431,8 +437,8 @@ public class MsdService extends Service{
 	 * This wrapper class handles all uncaught Exceptions in a Runnable. This is
 	 * neccessary since Thread.setDefaultUncaughtExceptionHandler will stop the
 	 * main Looper Thread and we still need it for the shutdown of the Service.
-	 * 
-	 * 
+	 *
+	 *
 	 */
 	class ExceptionHandlingRunnable implements Runnable{
 		Runnable r;
@@ -626,7 +632,7 @@ public class MsdService extends Service{
 			mainThreadHandler.post(new ExceptionHandlingRunnable(new Runnable(){
 				@Override
 				public void run() {
-					startLocationRecording();					
+					startLocationRecording();
 				}
 			}));
 			mainThreadHandler.post(new ExceptionHandlingRunnable(new Runnable(){
@@ -647,7 +653,7 @@ public class MsdService extends Service{
 			if (crash) {
 				MsdConfig.setCrash(MsdService.this, false);
 
-				mainThreadHandler.postDelayed(new ExceptionHandlingRunnable(new Runnable() {				
+				mainThreadHandler.postDelayed(new ExceptionHandlingRunnable(new Runnable() {
 					@Override
 					public void run() {
 						throw new IllegalStateException("Let's test error reporting");
@@ -656,7 +662,7 @@ public class MsdService extends Service{
 			}
 			info("startRecording() finished successfully");
 			return true;
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			handleFatalError("Exception in startRecording(): ", e);
 			return false;
 		}
@@ -728,8 +734,8 @@ public class MsdService extends Service{
 					int exitValue = helper.exitValue();
 					info("Helper terminated with exit value " + exitValue);
 				} catch(IllegalThreadStateException e){
-					handleFatalError("Failed to stop diag helper, calling destroy(): " + e.getMessage());		
-					helper.destroy();	
+					handleFatalError("Failed to stop diag helper, calling destroy(): " + e.getMessage());
+					helper.destroy();
 				}
 				helper = null;
 			}
@@ -799,13 +805,13 @@ public class MsdService extends Service{
 				sqliteThread = null;
 			}
 			if(!toDiagMsgQueue.isEmpty()){
-				handleFatalError("shutdown(): toDiagMsgQueue is not empty");			
+				handleFatalError("shutdown(): toDiagMsgQueue is not empty");
 			}
 			if(!toParserMsgQueue.isEmpty()){
 				handleFatalError("shutdown(): diagMsgQueue is not empty");
 			}
 			if(!pendingSqlStatements.isEmpty()){
-				handleFatalError("shutdown(): pendingSqlStatements is not empty");			
+				handleFatalError("shutdown(): pendingSqlStatements is not empty");
 			}
 			if(!shutdownError)
 				info("MsdService.shutdown completed successfully");
@@ -836,7 +842,7 @@ public class MsdService extends Service{
 	}
 
 	/**
-	 * 
+	 *
 	 * This Thread handles communication with the diag helper process
 	 *
 	 */
@@ -892,7 +898,7 @@ public class MsdService extends Service{
 						else
 							handleFatalError("ToDiagThread received DONE from toDiagMsgQueue but shuttingDown is not set");
 						return;
-					}					
+					}
 					byte[] msgData = elem.obj;
 					byte[] frame = toDev(new DiagMsg(msgData).frame());
 					diagStdin.writeInt(frame.length);
@@ -903,7 +909,7 @@ public class MsdService extends Service{
 				if(shuttingDown.get())
 					info("ToDiagThread shutting down due to InterruptedException while shuttingDown is set, OK");
 				else
-					handleFatalError("ToDiagThread received InterruptedException but shuttingDown is not set",e);					
+					handleFatalError("ToDiagThread received InterruptedException but shuttingDown is not set",e);
 			} catch (IOException e) {
 				handleFatalError("ToDiagThread: IOException while writing to helper: " + e.getMessage());
 			}
@@ -932,7 +938,7 @@ public class MsdService extends Service{
 					handleFatalError("EOFException while reading from diagStderr: " + e.getMessage());
 				}
 			} catch(IOException e){
-				handleFatalError("IOException while reading from diagStderr: " + e.getMessage());				
+				handleFatalError("IOException while reading from diagStderr: " + e.getMessage());
 			}
 		}
 	}
@@ -971,6 +977,40 @@ public class MsdService extends Service{
 					info("ToParserThread: IOException while writing to parser while shutting down: " + e.getMessage());
 				else
 					handleFatalError("ToParserThread: IOException while writing to parser: " + e.getMessage());
+			}
+		}
+	}
+
+	class FifoPiperThread extends Thread {
+		@Override
+		public void run() {
+			info("Starting piper thread");
+			ServerSocket listenSocket = null;
+			try {
+				listenSocket = new ServerSocket(9742);
+			} catch (IOException e) {
+				handleFatalError("Could not open pcap listening socket on port 9742: " + e.getMessage());
+			}
+			while (true) {
+				try {
+					// Accept only one client at the same time
+					info("Listening for new clients at port 9742");
+					Socket clientSocket = listenSocket.accept();
+					DataOutputStream clientOutputStream = new DataOutputStream(clientSocket.getOutputStream());
+
+					// If we are at FIFO EOF, reopen the FIFO
+					BufferedInputStream fifoStream = new BufferedInputStream(new FileInputStream("/sdcard/snoopsnitch_fifo"));
+					while (true) {
+						while (fifoStream.available() > 0) {
+							clientOutputStream.writeByte(fifoStream.read());
+						}
+						sleep(1000);
+					}
+				} catch (IOException e) {
+					info("IOException when sending PCAP data to client: " + e.getMessage());
+				} catch (InterruptedException e) {
+					info("InterruptedException when reading pcap file: " + e.getMessage());
+				}
 			}
 		}
 	}
@@ -1427,7 +1467,7 @@ public class MsdService extends Service{
 			// I do not know whether this code will be reached at all. Most
 			// phones only call this method with null as a parameter. So let's
 			// send a message so that we find out when it is called.
-			String msg = "onCellInfoChanged(" + ((cellInfo == null) ? "null" : cellInfo.size()) + ")"; 
+			String msg = "onCellInfoChanged(" + ((cellInfo == null) ? "null" : cellInfo.size()) + ")";
 			info(msg);
 		}
 		void doCellinfoList(List<CellInfo> cellInfo){
@@ -1490,7 +1530,7 @@ public class MsdService extends Service{
 					// Using Apache HttpClient since HttpURLConnection is very buggy:
 					// http://stackoverflow.com/questions/14454942/httpurlconnection-ifmodifiedsince-generates-utc-time-instead-of-gmt
 					// https://code.google.com/p/android/issues/detail?id=58637
-					// 
+					//
 					HttpClient httpClient = new DefaultHttpClient();
 					// The Apache HttpClient library shipped with Android does not support SNI.
 					// http://blog.dev001.net/post/67082904181/android-using-sni-and-tlsv1-2-with-apache
@@ -1552,7 +1592,7 @@ public class MsdService extends Service{
 					} else{ // Unexpected
 						MsdLog.e(TAG,"Unexpected HTTP response code" + statusCode + " in DownloadDataJsThread.run()");
 						return;
-					}				
+					}
 				} catch (Exception e) {
 					MsdLog.e(TAG,"Exception in DownloadDataJsThread.run()",e);
 					return;
@@ -1591,17 +1631,20 @@ public class MsdService extends Service{
 			vCmd.add("-g");
 			Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 			// Calendar.MONTH starts counting with 0
-			String filename = pcapBaseFileName + "_" + String.format(Locale.US, "%04d-%02d-%02d_%02d-%02d-%02dUTC",c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND)) + ".pcap";
+			String filename = "/sdcard/snoopsnitch_fifo";//pcapBaseFileName + "_" + "_fifo";// + String.format(Locale.US, "%04d-%02d-%02d_%02d-%02d-%02dUTC",c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND)) + ".pcap";
 			vCmd.add(filename);
 		}
 		vCmd.add("-");
 		cmd = vCmd.toArray(cmd);
 
-		info("Launching parser: " + TextUtils.join(" ",cmd));
+		info("Launching sparser: " + TextUtils.join(" ",cmd));
 		// Warning: /data/local/tmp is not accessible by default, must be manually changed to 755 (including parent directories)
 		//String cmd[] = {libdir+"/libstrace.so","-f","-v","-s","1000","-o","/data/local/tmp/parser.strace.log",parser_binary};
 		String env[] = {"LD_LIBRARY_PATH=" + libdir, "LD_PRELOAD=" + libdir + "/libcompat.so"};
 		parser =  Runtime.getRuntime().exec(cmd, env, null);
+		this.fifoPiperThread = new FifoPiperThread();
+		this.fifoPiperThread.start();
+
 		this.parserStdout = new BufferedReader(new InputStreamReader(parser.getInputStream()));
 		this.parserStdin = new DataOutputStream(parser.getOutputStream());
 		this.parserStderr = new BufferedReader(new InputStreamReader(parser.getErrorStream()));
@@ -1915,6 +1958,10 @@ public class MsdService extends Service{
 			handleFatalError("testRecordingState(): parserErrorThread has died");
 			ok = false;
 		}
+		if(!fifoPiperThread.isAlive()) {
+			handleFatalError("testRecordingState(): fifoPiperThread has died");
+			ok = false;
+		}
 		if(!fromParserThread.isAlive()){
 			handleFatalError("testRecordingState(): fromParserThread has died");
 			ok = false;
@@ -1925,13 +1972,13 @@ public class MsdService extends Service{
 		}
 		// Check message queues
 		if(toDiagMsgQueue.size() > 100){
-			warn("testRecordingState(): toDiagMsgQueue contains too many entries");		
-			//ok = false;	
+			warn("testRecordingState(): toDiagMsgQueue contains too many entries");
+			//ok = false;
 		}
 		if(toParserMsgQueue.size() > 100){
 			warn("testRecordingState(): diagMsgQueue contains too many entries");
 			//ok = false;
-		}		
+		}
 		if(rawWriter.getQueueSize() > 100){
 			warn("testRecordingState(): rawWriter contains too many queue entries");
 			//ok = false;
@@ -1952,7 +1999,7 @@ public class MsdService extends Service{
 			// time to do this until version 0.9. Do not throw an exception for now.
 			warn("SQL Statements are waiting for more than one minute, current queue size: " + pendingSqlStatements.size());
 		}
-		// Terminate extra file recording if the ActiveTestService doesn't terminate it (e.g. because it disappears)		
+		// Terminate extra file recording if the ActiveTestService doesn't terminate it (e.g. because it disappears)
 		if(extraRecordingRawFileWriter != null){
 			if(System.currentTimeMillis() > extraRecordingStartTime + 10*60*1000)
 				try {
@@ -2135,10 +2182,10 @@ public class MsdService extends Service{
 	 * Closes the debug logfile. This method should be called when the service
 	 * is terminated by the Android system or when it is terminated due to a
 	 * fatal error.
-	 * 
+	 *
 	 * Please note that messages sent after closeDebugOutput will be written to
 	 * Android Logcat only and not to a new debug logfile.
-	 * 
+	 *
 	 * @param crash
 	 */
 	private void closeDebugLog(boolean crash){
@@ -2165,7 +2212,7 @@ public class MsdService extends Service{
 	/**
 	 * Opens or reopens the debug log so that it only contains e.g. 1 hour of
 	 * output (which should be enough to debug a crash).
-	 * @throws EncryptedFileWriterError 
+	 * @throws EncryptedFileWriterError
 	 */
 	private long openOrReopenDebugLog(boolean forceReopen, boolean markForUpload) throws EncryptedFileWriterError{
 		if(!forceReopen && debugLogFileStartTime + 3600 * 1000 > System.currentTimeMillis())
