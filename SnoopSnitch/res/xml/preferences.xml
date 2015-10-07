@@ -176,6 +176,18 @@
 	            android:key="settings_pcap_filename_prefix"
 	            android:summary="@string/settings_pcap_filename_prefix_summary"
 	            android:title="@string/settings_pcap_filename_prefix" />
+            <CheckBoxPreference
+                android:defaultValue="false"
+                android:dependency="settings_enable_devel_options"
+                android:key="settings_enable_pcap_socket"
+                android:summary="@string/settings_enable_pcap_socket_summary"
+                android:title="@string/settings_enable_pcap_socket" />
+            <EditTextPreference
+	            android:defaultValue="9742"
+	            android:dependency="settings_enable_pcap_socket"
+	            android:key="settings_pcap_socket_port"
+	            android:summary="@string/settings_pcap_socket_port_summary"
+	            android:title="@string/settings_pcap_socket_port" />
         </PreferenceCategory>
     </PreferenceScreen>
 
