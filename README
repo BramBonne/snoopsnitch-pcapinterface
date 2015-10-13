@@ -1,3 +1,17 @@
+PCAP additions
+==============
+
+This fork was created in order to allow the PCAP data from the `/dev/diag` interface
+to be exposed through either `adb` or on the local network.
+
+To enable this functionality, go to SnoopSnitch's developer settings (Menu > Settings > Development),
+and enable 'PCAP socket'. Enabling the 'Listen on public network' option will
+allow you to connect over the network to the chosen port.
+
+Example usage is available in the file `Snoopsnitch/runforwardwireshark.sh`, where the socket
+is forwarded over adb to the local machine, and is then used for a live packet
+analysis in Wireshark.
+
 SnoopSnitch
 ===========
 
@@ -24,7 +38,7 @@ Resources
 Project website:       https://opensource.srlabs.de/projects/snoopsnitch
 Public Git repository: https://opensource.srlabs.de/git/snoopsnitch.git
 Mailing list:          https://lists.srlabs.de/cgi-bin/mailman/listinfo/gsmmap
-Email:			       snoopsnitch@srlabs.de 
+Email:			       snoopsnitch@srlabs.de
                        (PGP: 9728 A7F9 D457 1FBB 746F  5381 D52C AC10 634A 9561)
 
 Building from source
