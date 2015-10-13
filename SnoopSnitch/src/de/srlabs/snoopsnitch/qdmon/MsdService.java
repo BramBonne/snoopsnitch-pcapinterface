@@ -278,6 +278,7 @@ public class MsdService extends Service{
 	private long oldStackSize = 0;
 	private Handler mainThreadHandler = new Handler(Looper.getMainLooper());
 	private boolean fatalErrorOccured = false;
+	private String pcapFilename;
 
 	private MsdServiceNotifications msdServiceNotifications = new MsdServiceNotifications(this);
 
@@ -999,7 +1000,7 @@ public class MsdService extends Service{
 					DataOutputStream clientOutputStream = new DataOutputStream(clientSocket.getOutputStream());
 
 					// If we are at FIFO EOF, reopen the FIFO
-					BufferedInputStream fifoStream = new BufferedInputStream(new FileInputStream("/sdcard/snoopsnitch_fifo"));
+					BufferedInputStream fifoStream = new BufferedInputStream(new FileInputStream(pcapFilename));
 					while (true) {
 						while (fifoStream.available() > 0) {
 							clientOutputStream.writeByte(fifoStream.read());
@@ -1631,8 +1632,8 @@ public class MsdService extends Service{
 			vCmd.add("-g");
 			Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 			// Calendar.MONTH starts counting with 0
-			String filename = "/sdcard/snoopsnitch_fifo";//pcapBaseFileName + "_" + "_fifo";// + String.format(Locale.US, "%04d-%02d-%02d_%02d-%02d-%02dUTC",c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND)) + ".pcap";
-			vCmd.add(filename);
+			pcapFilename = pcapBaseFileName + "_" + String.format(Locale.US, "%04d-%02d-%02d_%02d-%02d-%02dUTC",c.get(Calendar.YEAR),c.get(Calendar.MONTH)+1,c.get(Calendar.DAY_OF_MONTH),c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND)) + ".pcap";
+			vCmd.add(pcapFilename);
 		}
 		vCmd.add("-");
 		cmd = vCmd.toArray(cmd);
