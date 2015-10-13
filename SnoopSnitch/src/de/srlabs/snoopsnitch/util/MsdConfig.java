@@ -7,10 +7,10 @@ import android.preference.PreferenceManager;
 
 /**
  * This class contains a set of static methods for accessing the App configuration.
- * 
+ *
  */
 public class MsdConfig {
-	
+
 	private static SharedPreferences sharedPrefs(Context context)
 	{
 		return context.getSharedPreferences("de.srlabs.snoopsnitch_preferences", Context.MODE_PRIVATE | Context.MODE_MULTI_PROCESS);
@@ -30,7 +30,7 @@ public class MsdConfig {
 		return 24*Integer.parseInt(sharedPrefs(context).getString("settings_basebandMetadataKeepDuration", "1"));
 
 	}
-	
+
 	public static int getLocationLogKeepDurationHours(Context context)
 	{
 		return 24*Integer.parseInt(sharedPrefs(context).getString("settings_locationLogKeepDuration", "1"));
@@ -68,7 +68,7 @@ public class MsdConfig {
 
 		return sharedPrefs(context).getBoolean("settings_dumpUnencryptedEvents", false);
 	}
-	
+
 	public static String getAppId(Context context)
 	{
 		return sharedPrefs(context).getString("settings_appId", "");
@@ -107,7 +107,7 @@ public class MsdConfig {
 	{
 		sharedPrefs(context).edit().putString("own_number", ownNumber).commit();
 	}
-	
+
 	public static boolean getActiveTestSMSMODisabled(Context context)
 	{
 		return sharedPrefs(context).getBoolean("settings_active_test_sms_mo_disabled", false);
@@ -146,7 +146,7 @@ public class MsdConfig {
 	{
 		return Integer.parseInt(sharedPrefs(context).getString("settings_active_test_num_iterations", "3"));
 	}
-	
+
 	public static boolean getParserLogging(Context context)
 	{
 		return sharedPrefs(context).getBoolean("settings_parser_logging", false);
@@ -156,14 +156,14 @@ public class MsdConfig {
 	{
 		return sharedPrefs(context).getBoolean("device_compatible_detected", false);
 	}
-	
+
 	public static void setDeviceCompatibleDetected(Context context, boolean compatible)
 	{
 		Editor editor = sharedPrefs(context).edit();
 		editor.putBoolean("device_compatible_detected", compatible);
 		editor.commit();
 	}
-	
+
 	public static boolean getDumpAnalysisStackTraces(Context context)
 	{
 		return sharedPrefs(context).getBoolean("settings_debugging_dump_analysis_stacktraces", false);
@@ -238,5 +238,17 @@ public class MsdConfig {
 	public static String getPcapFilenamePrefix(Context context)
 	{
 		return sharedPrefs(context).getString("settings_pcap_filename_prefix", "/sdcard/snoopsnitch");
+	}
+	public static boolean getPcapSocketEnabled(Context context){
+		return sharedPrefs(context).getBoolean("settings_enable_pcap_socket", true);
+	}
+	public static int getPcapSocketPort(Context context) throws Exception{
+		int port = Integer.parseInt(sharedPrefs(context).getString("settings_pcap_socket_port", "9742"));
+		if (port < 1024 || port > 65535)
+			throw new Exception("Error: port should be in range [1024,65535]");
+		return port;
+	}
+	public static boolean getPcapSocketIsPublic(Context context){
+		return sharedPrefs(context).getBoolean("settings_pcap_socket_is_public", false);
 	}
 }

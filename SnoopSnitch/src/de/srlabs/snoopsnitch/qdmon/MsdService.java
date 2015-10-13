@@ -30,6 +30,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import java.net.ServerSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.io.FileNotFoundException;
 import java.io.BufferedInputStream;
@@ -257,7 +258,7 @@ public class MsdService extends Service{
 	private SqliteThread sqliteThread = null;
 	private ParserErrorThread parserErrorThread;
 	private FromParserThread fromParserThread;
-	private FifoPiperThread fifoPiperThread;
+	private PcapServerThread pcapServerThread;
 	private ToParserThread toParserThread;
 	private ToDiagThread toDiagThread;
 	private DiagErrorThread diagErrorThread;
@@ -982,20 +983,34 @@ public class MsdService extends Service{
 		}
 	}
 
-	class FifoPiperThread extends Thread {
+	class PcapServerThread extends Thread {
+		private int tcpPort;
+		private boolean listenPublic;
+		private ServerSocket listenSocket;
+
+		public PcapServerThread(int tcpPort, boolean listenPublic) {
+			super();
+			this.tcpPort = tcpPort;
+			this.listenPublic = listenPublic;
+		}
+
 		@Override
 		public void run() {
-			info("Starting piper thread");
-			ServerSocket listenSocket = null;
+			info("Starting pcap server thread");
 			try {
-				listenSocket = new ServerSocket(9742);
+				if (listenPublic) {
+					listenSocket = new ServerSocket(tcpPort);
+				} else {
+					// Open socket on localhost for security reasons (do not expose to network, only to adb)
+					listenSocket = new ServerSocket(tcpPort, 0, InetAddress.getByName("localhost"));
+				}
 			} catch (IOException e) {
-				handleFatalError("Could not open pcap listening socket on port 9742: " + e.getMessage());
+				handleFatalError("Could not open pcap listening socket on port " + tcpPort + ": " + e.getMessage());
 			}
 			while (true) {
 				try {
 					// Accept only one client at the same time
-					info("Listening for new clients at port 9742");
+					info("Listening for new clients at port " + tcpPort);
 					Socket clientSocket = listenSocket.accept();
 					DataOutputStream clientOutputStream = new DataOutputStream(clientSocket.getOutputStream());
 
@@ -1643,8 +1658,14 @@ public class MsdService extends Service{
 		//String cmd[] = {libdir+"/libstrace.so","-f","-v","-s","1000","-o","/data/local/tmp/parser.strace.log",parser_binary};
 		String env[] = {"LD_LIBRARY_PATH=" + libdir, "LD_PRELOAD=" + libdir + "/libcompat.so"};
 		parser =  Runtime.getRuntime().exec(cmd, env, null);
-		this.fifoPiperThread = new FifoPiperThread();
-		this.fifoPiperThread.start();
+
+		if(MsdConfig.getPcapRecordingEnabled(this) && MsdConfig.getPcapFilenamePrefix(this).length() > 0 &&
+			MsdConfig.getPcapSocketEnabled(this)) {
+				int port = MsdConfig.getPcapSocketPort(this);
+				boolean publicPort = MsdConfig.getPcapSocketIsPublic(this);
+				this.pcapServerThread = new PcapServerThread(port, publicPort);
+				this.pcapServerThread.start();
+		}
 
 		this.parserStdout = new BufferedReader(new InputStreamReader(parser.getInputStream()));
 		this.parserStdin = new DataOutputStream(parser.getOutputStream());
@@ -1959,8 +1980,8 @@ public class MsdService extends Service{
 			handleFatalError("testRecordingState(): parserErrorThread has died");
 			ok = false;
 		}
-		if(!fifoPiperThread.isAlive()) {
-			handleFatalError("testRecordingState(): fifoPiperThread has died");
+		if(!pcapServerThread.isAlive()) {
+			handleFatalError("testRecordingState(): pcapServerThread has died");
 			ok = false;
 		}
 		if(!fromParserThread.isAlive()){
