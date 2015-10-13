@@ -1661,7 +1661,12 @@ public class MsdService extends Service{
 
 		if(MsdConfig.getPcapRecordingEnabled(this) && MsdConfig.getPcapFilenamePrefix(this).length() > 0 &&
 			MsdConfig.getPcapSocketEnabled(this)) {
-				int port = MsdConfig.getPcapSocketPort(this);
+				int port = 9742;
+				try {
+					port = MsdConfig.getPcapSocketPort(this);
+				} catch (Exception e) {
+					warn("Could not get pcap socket port from config file, using 9742 instead. Error was: " + e.getMessage());
+				}
 				boolean publicPort = MsdConfig.getPcapSocketIsPublic(this);
 				this.pcapServerThread = new PcapServerThread(port, publicPort);
 				this.pcapServerThread.start();
@@ -1980,7 +1985,7 @@ public class MsdService extends Service{
 			handleFatalError("testRecordingState(): parserErrorThread has died");
 			ok = false;
 		}
-		if(!pcapServerThread.isAlive()) {
+		if(pcapServerThread != null && !pcapServerThread.isAlive()) {
 			handleFatalError("testRecordingState(): pcapServerThread has died");
 			ok = false;
 		}
