@@ -226,7 +226,7 @@ public class ActiveTestHelper{
 		String positiveButtonText;
 		String networkTestMessage;
 		if(uploadDisabled) {
-			positiveButtonText = context.getResources().getString(R.string.alert_button_ok);
+			positiveButtonText = context.getResources().getString(android.R.string.ok);
 			networkTestMessage =
 				context.getResources().getString(R.string.alert_networktest_message);
 		} else {
@@ -235,11 +235,11 @@ public class ActiveTestHelper{
 				context.getResources().getString(R.string.alert_networktest_message) + "\n" +
 				context.getResources().getString(R.string.alert_networktest_privacy_disclaimer);
 		}
-		confirmDialog = MsdDialog.makeConfirmationDialog(context, networkTestMessage, new OnClickListener() 
+		confirmDialog = MsdDialog.makeConfirmationDialog(context, networkTestMessage, new OnClickListener()
 		{
 			private boolean alreadyClicked = false;
 			@Override
-			public void onClick(DialogInterface dialog, int which) 
+			public void onClick(DialogInterface dialog, int which)
 			{
 				if(alreadyClicked)
 					return;
@@ -254,7 +254,7 @@ public class ActiveTestHelper{
 				queryPhoneNumberAndStart();
 			}
 		}, null,null,
-		positiveButtonText, context.getString(R.string.alert_button_cancel), false);
+		positiveButtonText, context.getString(android.R.string.cancel), false);
 		confirmDialog.show();
 	}
 
